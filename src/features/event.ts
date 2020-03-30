@@ -66,22 +66,31 @@ function addCreateEventThread(convo: BotkitConversation<{}>): void {
   convo.addQuestion("OK. Next, write a few sentences to describe your event.", noopConvoHandler, { key: 'description' }, 'create_event');
 
   convo.addQuestion(
-    "When will the event happen?\n\n"
-    + "**Example:** Friday from 5 to 6 PM.\n\n"
-    + "**Example:** March 1st, noon to 3\n\n"
-    + "**Example:** Today at 6:00",
-    async (res, _convo, bot) => {
+    "When will the event happen? For example, \"Friday from 5 to 6 PM\", \"March 1st, noon to 3\", or \"tomorrow at 8am to 8:30\".",
+    async (res, convo, bot) => {
       const date = chrono.parse(res);
-      bot.say(JSON.stringify(date));
+      console.log(date);
+
+      if(!date || date.length != 1 || !date[0].end)
+      {
+        bot.say("I didn't understand, or maybe you left out the end time. Try again.")
+        await convo.repeat();
+      }
+      else
+      {
+        convo.setVar('event_time', date[0]);
+        convo.setVar('event_time_start', date[0].start.date);
+        convo.setVar('event_time_end', date[0].end.date);
+      }
     },
-    'event_time',
+    null,
     'create_event'
   );
 
-  convo.addMessage("Here's the event I'll make.", 'create_event');
+  convo.addMessage("OK, here's the event I'll make.", 'create_event');
   convo.addMessage("**Title:** {{vars.title}}\n\n"
     + "**Description:** {{vars.description}}\n\n"
-    + "**Time:** " + convo.vars.event_time //{{vars.event_time}}",
+    + "**Time:** {{vars.event_time_start}} - {{vars.event_time_end}}",
     'create_event');
 
   convo.addQuestion(
@@ -99,7 +108,7 @@ function addCreateEventThread(convo: BotkitConversation<{}>): void {
       {
         default: true,
         handler: async (_answer: string, convo: BotkitDialogWrapper, bot: BotWorker) => {
-          bot.say("OK, let's try again.");
+          bot.say("OK, let's try that again.");
           convo.gotoThread('create_event');
         }
       }

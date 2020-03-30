@@ -1,13 +1,13 @@
 {
-  "name": "botkit-tirebot-web",
+  "name": "dsa-slackbot",
   "version": "1.0.0",
   "main": "./dist/bot.js",
   "scripts": {
     "copy": "npm run copy:package & npm run copy:site",
     "copy:package": "copyfiles package.json package-lock.json dist/",
-    "copy:site": "copyup src/public/**/* src/sass/**/* dist/",
+    "copy:site": "copyfiles src/public/**/* src/sass/**/* dist/ --up 1",
     "prestart": "npm run copy",
-    "start": "tsc-watch --onSuccess \"node dist/bot.js\""
+    "start:dev": "tsc-watch --onSuccess \"node dist/bot.js\""
   },
   "dependencies": {
     "botbuilder-adapter-web": "^1.0.7",
