@@ -66,7 +66,7 @@ function addCreateEventThread(convo: BotkitConversation<{}>): void {
   convo.addQuestion("OK. Next, write a few sentences to describe your event.", noopConvoHandler, { key: 'description' }, 'create_event');
 
   convo.addQuestion(
-    "When will the event happen? For example, \"Friday from 5 to 6 PM\", \"March 1st, noon to 3\", or \"tomorrow at 8am to 8:30\".",
+    "When will the event happen? For example, say \"Friday from 5 to 6 PM\", \"March 1st, noon to 3\", or \"tomorrow at 8am to 8:30\".",
     async (res, convo, bot) => {
       const date = chrono.parse(res);
       console.log(date);
@@ -79,8 +79,8 @@ function addCreateEventThread(convo: BotkitConversation<{}>): void {
       else
       {
         convo.setVar('event_time', date[0]);
-        convo.setVar('event_time_start', date[0].start.date);
-        convo.setVar('event_time_end', date[0].end.date);
+        convo.setVar('event_time_start', date[0].start.date().toLocaleString());
+        convo.setVar('event_time_end', date[0].end.date().toLocaleTimeString());
       }
     },
     null,

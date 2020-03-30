@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "./dist/bot.js",
   "scripts": {
+    "build": "tsc && npm run copy",
     "copy": "npm run copy:package & npm run copy:site",
     "copy:package": "copyfiles package.json package-lock.json dist/",
     "copy:site": "copyfiles src/public/**/* src/sass/**/* dist/ --up 1",
