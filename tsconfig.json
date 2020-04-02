@@ -6,6 +6,7 @@
       "es6"
     ],
     "allowJs": true,
+    "resolveJsonModule": true,
     "declaration": true,
     "sourceMap": true,
     "outDir": "./dist",
