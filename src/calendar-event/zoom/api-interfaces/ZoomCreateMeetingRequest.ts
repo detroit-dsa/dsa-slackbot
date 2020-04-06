@@ -6,6 +6,6 @@ export interface ZoomCreateMeetingRequest {
   start_time: Date;
   duration: number;
   timezone: string;
-  password: string;
+  password?: string;
   agenda: string;
 }
