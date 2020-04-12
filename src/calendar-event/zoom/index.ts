@@ -1,7 +1,6 @@
-import axios from 'axios';
-import { ZoomListMeetingsResponse } from './api-interfaces/ZoomListMeetingsResponse';
-import { ZoomCreateMeetingResponse } from './api-interfaces/ZoomCreateMeetingResponse';
-import { ZoomCreateMeetingRequest } from './api-interfaces/ZoomCreateMeetingRequest';
+import axios from "axios";
+import { ZoomListMeetingsResponse } from "./api-interfaces/ZoomApiCollections";
+import { ZoomCreateMeetingRequest, ZoomCreateMeetingResponse } from "./api-interfaces/ZoomMeeting";
 
 const ZOOM_API_BASE_URL: string = "https://api.zoom.us/v2";
 
