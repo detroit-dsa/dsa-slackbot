@@ -1,13 +1,13 @@
-import { Botkit } from 'botkit';
-import { WebAdapter } from 'botbuilder-adapter-web';
+import { Botkit } from "botkit";
+import { WebAdapter } from "botbuilder-adapter-web";
 
-require('dotenv').config();
+require("dotenv").config();
 
 const controller = new Botkit({
-  webhook_uri: '/api/messages',
+  webhook_uri: "/api/messages",
   adapter: new WebAdapter({})
 });
 
 controller.ready(() => {
-  controller.loadModules(__dirname + '/features');
+  controller.loadModules(__dirname + "/features");
 });

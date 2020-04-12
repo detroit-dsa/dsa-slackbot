@@ -1,18 +1,18 @@
 declare module chrono {
   export class ParsedResult {
-      start: ParsedComponents;
-      end: ParsedComponents;
-      index: number;
-      text: string;
-      ref: Date;
+    start: ParsedComponents;
+    end: ParsedComponents;
+    index: number;
+    text: string;
+    ref: Date;
   }
 
   export class ParsedComponents {
-      assign(component: string, value: number): void;
-      imply(component: string, value: number): void;
-      get(component: string): number;
-      isCertain(component: string): boolean;
-      date(): Date;
+    assign(component: string, value: number): void;
+    imply(component: string, value: number): void;
+    get(component: string): number;
+    isCertain(component: string): boolean;
+    date(): Date;
   }
 
   export function parseDate(text: string, refDate?: Date, opts?: any): Date;
