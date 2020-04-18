@@ -1,8 +1,9 @@
-import { Botkit, BotkitConversation, BotkitDialogWrapper, BotWorker } from "botkit";
+import { Botkit, BotkitConversation } from "botkit";
 import * as chrono from "chrono-node";
 import { ZoomApiClient } from "../calendar-event/zoom";
 import { ZoomMeetingType } from "../calendar-event/zoom/api-interfaces/ZoomMeetingType";
 import { ZoomCreateMeetingRequest } from "../calendar-event/zoom/api-interfaces/ZoomMeeting";
+import { ZoomMeetingApprovalType } from "../calendar-event/zoom/api-interfaces/ZoomMeetingApprovalType";
 
 const CREATE_CALENDAR_EVENT_DIALOG_ID = "create_event";
 const LIST_CALENDAR_EVENTS_DIALOG_ID = "list_events";
@@ -10,18 +11,8 @@ const LIST_CALENDAR_EVENTS_DIALOG_ID = "list_events";
 const zoomClient = new ZoomApiClient(process.env.ZOOM_JWT);
 // const googleCalendarClient = new GoogleCalendarApiClient();
 
-const quickReplyYesNo = [
-  {
-    title: "Yes",
-    payload: "yes"
-  },
-  {
-    title: "No",
-    payload: "no"
-  }
-];
-
-const noopConvoHandler = async (_answer: string, _convo: BotkitDialogWrapper, _bot: BotWorker): Promise<void> => { };
+const noopConvoHandler = async () => { };
+const quickReplyYesNo = [{ title: "Yes", payload: "yes" }, { title: "No", payload: "no" }];
 
 export default function (
   controller: Botkit
@@ -105,8 +96,8 @@ function addCreateEventThread(
         await convo.repeat();
       }
       else {
-        convo.setVar("event_time_start", parsedDate[0].start.date().toLocaleString());
-        convo.setVar("event_time_end", parsedDate[0].end.date().toLocaleTimeString());
+        convo.setVar("event_time_start", parsedDate[0].start.date().toLocaleString([], { weekday: "long", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }));
+        convo.setVar("event_time_end", parsedDate[0].end.date().toLocaleString([], { hour: "2-digit", minute: "2-digit" }));
       }
     },
     { key: "event_time_text" }
@@ -115,11 +106,9 @@ function addCreateEventThread(
   convo.say("OK, here's the event I'll make.");
 
   convo.say(`
-**Title:** {{vars.title}}
-
-**Description:** {{vars.description}}
-
-**Time:** {{vars.event_time_start}} - {{vars.event_time_end}}`
+**Title:** {{vars.title}}<br />
+**Time:** {{vars.event_time_start}} - {{vars.event_time_end}}<br />
+**Description:** {{vars.description}}`
   );
 
   convo.ask(
@@ -150,25 +139,13 @@ function addCreateEventThread(
 function addFinishThread(
   convo: BotkitConversation<{}>
 ) {
-  convo.addMessage(
-    `👍 Created Zoom event.
-
-
-
-**Title:** {{vars.title}}
-
-**Time:** {{vars.event_time_start}} - {{vars.event_time_end}}
-
-**Host URL:** (For host use only!) {{vars.host_url}}
-
-**Join URL:** (Share this around) {{vars.join_url}}`,
-    "finish"
-  );
+  convo.addAction("finish");
 
   convo.before("finish", async (convo, _bot) => {
     const parsedDate = chrono.parse(convo.vars.event_time_text)[0];
     const startTime = parsedDate.start.date();
     const durationMinutes = Math.ceil((+parsedDate.end.date() - +parsedDate.start.date()) / 60000);
+    const password = generatePassword(8);
 
     const createZoomMeetingRequest: ZoomCreateMeetingRequest = {
       topic: convo.vars.title,
@@ -176,17 +153,57 @@ function addFinishThread(
       start_time: getLocalISOString(startTime),
       duration: durationMinutes,
       timezone: "America/New_York",
-      type: ZoomMeetingType.Scheduled
+      type: ZoomMeetingType.Scheduled,
+      password: password,
+      settings: {
+        approval_type: ZoomMeetingApprovalType.NoRegistrationRequired,
+        join_before_host: true,
+        waiting_room: false,
+        mute_upon_entry: true
+      }
     };
 
     const zoomResponse = await zoomClient.createMeeting(createZoomMeetingRequest);
     convo.setVar("host_url", zoomResponse.start_url);
     convo.setVar("join_url", zoomResponse.join_url);
+    convo.setVar("password", password);
 
     // TODO: Google calendar event
   });
 
+  convo.addMessage(
+    `👍 I created your Zoom event.
+
+**Host link (use this to start the meeting as the host)**
+
+{{vars.host_url}}
+
+**Share with attendees**
+
+{{vars.title}}<br />
+{{vars.event_time_start}} - {{vars.event_time_end}}
+
+{{vars.join_url}}<br />
+Password: {{vars.password}}
+
+{{vars.description}}`,
+    "finish"
+  );
+
   convo.addAction("complete", "finish");
+}
+
+function generatePassword(
+  length: number
+): string {
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  let result = "";
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+
+  return result;
 }
 
 function getLocalISOString(

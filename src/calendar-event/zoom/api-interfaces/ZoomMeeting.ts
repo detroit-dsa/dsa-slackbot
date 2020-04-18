@@ -1,4 +1,5 @@
 import { ZoomMeetingType } from "./ZoomMeetingType";
+import { ZoomMeetingApprovalType } from "./ZoomMeetingApprovalType";
 
 export interface ZoomMeeting {
   type: ZoomMeetingType;
@@ -8,6 +9,7 @@ export interface ZoomMeeting {
   duration: number;
   timezone?: string;
   password?: string;
+  settings?: ZoomMeetingSettings;
 }
 
 export interface ZoomScheduledMeeting extends ZoomMeeting {
@@ -24,4 +26,11 @@ export interface ZoomCreateMeetingResponse extends ZoomScheduledMeeting { }
 
 export interface ZoomGetMeetingResponse extends ZoomScheduledMeeting {
   uuid: string;
+}
+
+export interface ZoomMeetingSettings {
+  join_before_host: boolean;
+  waiting_room: boolean;
+  mute_upon_entry: boolean;
+  approval_type: ZoomMeetingApprovalType;
 }
