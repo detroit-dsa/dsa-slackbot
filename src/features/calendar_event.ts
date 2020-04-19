@@ -197,25 +197,24 @@ function addFinishThread(
     console.log(gcalResponse);
   });
 
+  convo.addMessage("👍 I created your event.", "finish");
+  convo.addMessage(`**Host link**
+  <br />
+  Keep this private!
+
+  <a href="{{vars.host_url}}">Start meeting as host</a>
+  `, "finish");
   convo.addMessage(
-    `👍 I created your event.
+    `**Share with attendees**
 
-**Host link**
-<br />
-Keep this private! Use it to start the meeting as the host.
-
-{{vars.host_url}}
-
-**Share with attendees**
-
-{{vars.calendar_link}}
+<a href="{{vars.calendar_link}}">Google Calendar event</a>
 
 {{vars.title}}<br />
 {{vars.event_time_start}} - {{vars.event_time_end}}
 
 {{vars.description}}
-
-Join Zoom meeting: {{vars.join_url}}<br />
+<hr />
+Join Zoom meeting: <a href="{{vars.join_url}}">{{vars.join_url}}</a><br />
 Password: {{vars.password}}`,
     "finish"
   );
