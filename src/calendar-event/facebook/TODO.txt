@@ -1,2 +1,0 @@
-- Get calendar events from Facebook
-- Allow new calendar events to be added to Facebook

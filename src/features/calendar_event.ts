@@ -4,12 +4,13 @@ import { ZoomApiClient } from "../calendar-event/zoom";
 import { ZoomMeetingType } from "../calendar-event/zoom/api-interfaces/ZoomMeetingType";
 import { ZoomCreateMeetingRequest } from "../calendar-event/zoom/api-interfaces/ZoomMeeting";
 import { ZoomMeetingApprovalType } from "../calendar-event/zoom/api-interfaces/ZoomMeetingApprovalType";
+import { GoogleCalendarApiClient } from "../calendar-event/google-calendar";
 
 const CREATE_CALENDAR_EVENT_DIALOG_ID = "create_event";
 const LIST_CALENDAR_EVENTS_DIALOG_ID = "list_events";
 
 const zoomClient = new ZoomApiClient(process.env.ZOOM_JWT);
-// const googleCalendarClient = new GoogleCalendarApiClient();
+const googleCalendarClient = new GoogleCalendarApiClient(process.env.GOOGLE_CALENDAR_ID!, process.env.GOOGLE_JSON_CRED_PATH!);
 
 const noopConvoHandler = async () => { };
 const quickReplyYesNo = [{ title: "Yes", payload: "yes" }, { title: "No", payload: "no" }];
@@ -89,7 +90,7 @@ function addCreateEventThread(
   convo.ask(
     "When will the event happen? For example, say \"Friday from 5 to 6 PM\", \"March 1st, noon to 3\", or \"tomorrow at 8am to 8:30\".",
     async (res, convo, bot) => {
-      const parsedDate = chrono.parse(res);
+      const parsedDate = chrono.parse(res, new Date(), { forwardDate: true });
 
       if (!parsedDate || parsedDate.length != 1 || !parsedDate[0].end) {
         bot.say("I didn't understand, or maybe you left out the end time. Try again.")
@@ -120,7 +121,7 @@ function addCreateEventThread(
       {
         pattern: "yes",
         handler: async (_answer, convo, bot) => {
-          bot.say("Creating your event in Zoom...");
+          bot.say("Creating your event in Zoom and Google Calendar...");
           convo.gotoThread("finish");
         }
       },
@@ -128,7 +129,7 @@ function addCreateEventThread(
         default: true,
         handler: async (_answer, convo, bot) => {
           bot.say("OK, let's try that again.");
-          convo.gotoThread("create_event");
+          convo.gotoThread("default");
         }
       }
     ],
@@ -142,15 +143,18 @@ function addFinishThread(
   convo.addAction("finish");
 
   convo.before("finish", async (convo, _bot) => {
-    const parsedDate = chrono.parse(convo.vars.event_time_text)[0];
+    const parsedDate = chrono.parse(convo.vars.event_time_text, new Date(), { forwardDate: true })[0];
     const startTime = parsedDate.start.date();
     const durationMinutes = Math.ceil((+parsedDate.end.date() - +parsedDate.start.date()) / 60000);
     const password = generatePassword(8);
 
+    const startTimeISO = getLocalISOString(startTime);
+    const endTimeISO = getLocalISOString(parsedDate.end.date());
+
     const createZoomMeetingRequest: ZoomCreateMeetingRequest = {
       topic: convo.vars.title,
       agenda: convo.vars.description,
-      start_time: getLocalISOString(startTime),
+      start_time: startTimeISO,
       duration: durationMinutes,
       timezone: "America/New_York",
       type: ZoomMeetingType.Scheduled,
@@ -168,25 +172,51 @@ function addFinishThread(
     convo.setVar("join_url", zoomResponse.join_url);
     convo.setVar("password", password);
 
-    // TODO: Google calendar event
+    const gcalDescription = `${convo.vars.description}
+<hr /><b>Join Zoom meeting:</b> ${convo.vars.join_url}
+<b>Password:</b> ${convo.vars.password}`;
+
+    const gcalResponse = await googleCalendarClient.addEvent(
+      {
+        summary: convo.vars.title,
+        description: gcalDescription,
+        start: {
+          dateTime: startTimeISO,
+          timeZone: "America/New_York"
+        },
+        end: {
+          dateTime: endTimeISO,
+          timeZone: "America/New_York"
+        },
+        location: zoomResponse.join_url
+      }
+    );
+
+   convo.setVar("calendar_link", gcalResponse.data.htmlLink);
+
+    console.log(gcalResponse);
   });
 
   convo.addMessage(
-    `👍 I created your Zoom event.
+    `👍 I created your event.
 
-**Host link (use this to start the meeting as the host)**
+**Host link**
+<br />
+Keep this private! Use it to start the meeting as the host.
 
 {{vars.host_url}}
 
 **Share with attendees**
 
+{{vars.calendar_link}}
+
 {{vars.title}}<br />
 {{vars.event_time_start}} - {{vars.event_time_end}}
 
-{{vars.join_url}}<br />
-Password: {{vars.password}}
+{{vars.description}}
 
-{{vars.description}}`,
+Join Zoom meeting: {{vars.join_url}}<br />
+Password: {{vars.password}}`,
     "finish"
   );
 
