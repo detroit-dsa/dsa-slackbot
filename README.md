@@ -13,6 +13,12 @@
     * Generate credentials as JSON
     * Go to the calendar and add the service account to the list of editors
 
+### Slack setup
+
+Use ngrok to set up a public URL for the local instance of your bot.
+
+Go to the Event Subscriptions page and set the Request URL to http://YOURAPP.ngrok.io/api/messages
+
 ### Run a local web server for testing
 
 ```bash

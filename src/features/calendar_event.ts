@@ -8,6 +8,7 @@ import { GoogleCalendarApiClient } from "../calendar-event/google-calendar";
 
 const CREATE_CALENDAR_EVENT_DIALOG_ID = "create_event";
 const LIST_CALENDAR_EVENTS_DIALOG_ID = "list_events";
+const TIME_ZONE = "America/New_York";
 
 const zoomClient = new ZoomApiClient(process.env.ZOOM_JWT);
 const googleCalendarClient = new GoogleCalendarApiClient(process.env.GOOGLE_CALENDAR_ID!, process.env.GOOGLE_JSON_CRED_PATH!);
@@ -156,7 +157,7 @@ function addFinishThread(
       agenda: convo.vars.description,
       start_time: startTimeISO,
       duration: durationMinutes,
-      timezone: "America/New_York",
+      timezone: TIME_ZONE,
       type: ZoomMeetingType.Scheduled,
       password: password,
       settings: {
@@ -182,11 +183,11 @@ function addFinishThread(
         description: gcalDescription,
         start: {
           dateTime: startTimeISO,
-          timeZone: "America/New_York"
+          timeZone: TIME_ZONE
         },
         end: {
           dateTime: endTimeISO,
-          timeZone: "America/New_York"
+          timeZone: TIME_ZONE
         },
         location: zoomResponse.join_url
       }
