@@ -1,8 +1,7 @@
-import { Botkit, BotkitConversation } from "botkit";
+import { BotkitConversation } from "botkit";
 import * as chrono from "chrono-node";
 import { ZoomApiClient } from "../calendar-event/zoom";
 import { ZoomMeetingType } from "../calendar-event/zoom/api-interfaces/ZoomMeetingType";
-import { ZoomCreateMeetingRequest } from "../calendar-event/zoom/api-interfaces/ZoomMeeting";
 import { ZoomMeetingApprovalType } from "../calendar-event/zoom/api-interfaces/ZoomMeetingApprovalType";
 import { GoogleCalendarApiClient } from "../calendar-event/google-calendar";
 
@@ -11,30 +10,35 @@ const LIST_CALENDAR_EVENTS_DIALOG_ID = "list_events";
 const TIME_ZONE = "America/New_York";
 
 const zoomClient = new ZoomApiClient(process.env.ZOOM_JWT);
-const googleCalendarClient = new GoogleCalendarApiClient(process.env.GOOGLE_CALENDAR_ID!, process.env.GOOGLE_JSON_CRED_PATH!);
+const googleCalendarClient = new GoogleCalendarApiClient(process.env.GOOGLE_CALENDAR_ID, process.env.GOOGLE_JSON_CRED_PATH);
 
 const noopConvoHandler = async () => { };
-const quickReplyYesNo = [{ title: "Yes", payload: "yes" }, { title: "No", payload: "no" }];
 
-export default function (
-  controller: Botkit
-) {
+export default function (controller) {
+  controller.interrupts(["quit", "cancel"], "direct_message", async (bot, message) => {
+    await bot.reply(message, "OK, never mind.");
+    await bot.cancelAllDialogs();
+  });
+
   addCreateEventDialog(controller);
   addListEventsDialog(controller);
 
-  controller.hears("event", "message,direct_mention,direct_message", async (bot, _message) => {
-    await bot.beginDialog(CREATE_CALENDAR_EVENT_DIALOG_ID);
-  });
+  controller.hears(["meeting"], ["direct_mention", "direct_message"], async (bot, message) => {
+    if (message.type !== "direct_message") {
+      await bot.replyEphemeral(message, "I'll DM you to get the details.")
+    }
 
-  controller.hears("list", "message,direct_mention,direct_message", async (bot, _message) => {
-    bot.say("Looking up the next 10 events from Zoom...");
-    await bot.beginDialog(LIST_CALENDAR_EVENTS_DIALOG_ID);
-  });
+    await bot.startPrivateConversation(message.user);
+    await bot.beginDialog(CREATE_CALENDAR_EVENT_DIALOG_ID);
+  })
+
+  // controller.hears("list", "message,direct_mention,direct_message", async (bot, _message) => {
+  //   bot.say("Looking up the next 10 events from Zoom...");
+  //   await bot.beginDialog(LIST_CALENDAR_EVENTS_DIALOG_ID);
+  // });
 }
 
-function addListEventsDialog(
-  controller: Botkit
-): BotkitConversation<{}> {
+function addListEventsDialog(controller) {
   const convo = new BotkitConversation(LIST_CALENDAR_EVENTS_DIALOG_ID, controller);
   convo.addAction("list_events");
 
@@ -61,9 +65,7 @@ function addListEventsDialog(
   return convo;
 }
 
-function addCreateEventDialog(
-  controller: Botkit
-): BotkitConversation<{}> {
+function addCreateEventDialog(controller) {
   const convo = new BotkitConversation(CREATE_CALENDAR_EVENT_DIALOG_ID, controller);
   addCreateEventThread(convo);
   addCancelThread(convo);
@@ -73,23 +75,21 @@ function addCreateEventDialog(
   return convo;
 }
 
-function addCreateEventThread(
-  convo: BotkitConversation<{}>
-) {
+function addCreateEventThread(convo) {
   convo.ask(
-    "What's the title of your event?",
+    "Let's get your meeting on the calendar. What's the title of the meeting?",
     noopConvoHandler,
     { key: "title" }
   );
 
   convo.ask(
-    "OK. Next, write a few sentences to describe your event.",
+    "OK. Next, write a few sentences to describe the meeting.",
     noopConvoHandler,
     { key: "description" }
   );
 
   convo.ask(
-    "When will the event happen? For example, say \"Friday from 5 to 6 PM\", \"March 1st, noon to 3\", or \"tomorrow at 8am to 8:30\".",
+    "When will the meeting happen? For example, say \"Friday from 5 to 6 PM\", \"March 1st, noon to 3\", or \"tomorrow at 8am to 8:30\".",
     async (res, convo, bot) => {
       const parsedDate = chrono.parse(res, new Date(), { forwardDate: true });
 
@@ -105,27 +105,29 @@ function addCreateEventThread(
     { key: "event_time_text" }
   );
 
-  convo.say("OK, here's the event I'll make.");
+  convo.say("OK, here's the meeting I'll make.");
 
   convo.say(`
-**Title:** {{vars.title}}<br />
-**Time:** {{vars.event_time_start}} - {{vars.event_time_end}}<br />
-**Description:** {{vars.description}}`
+*Title:* {{vars.title}}
+*Time:* {{vars.event_time_start}} - {{vars.event_time_end}}
+*Description:* {{vars.description}}`
   );
+
+  const yesHandler = async (_answer, convo, bot) => {
+    bot.say("Creating your meeting in Zoom and Google Calendar...");
+    convo.gotoThread("finish");
+  };
 
   convo.ask(
     {
-      text: ["Look good?"],
-      quick_replies: quickReplyYesNo
+      text: ["Look good?"]
     },
     [
-      {
-        pattern: "yes",
-        handler: async (_answer, convo, bot) => {
-          bot.say("Creating your event in Zoom and Google Calendar...");
-          convo.gotoThread("finish");
-        }
-      },
+      { pattern: "ok", handler: yesHandler },
+      { pattern: "yep", handler: yesHandler },
+      { pattern: "sure", handler: yesHandler },
+      { pattern: "yeah", handler: yesHandler },
+      { pattern: "yes", handler: yesHandler },
       {
         default: true,
         handler: async (_answer, convo, bot) => {
@@ -138,9 +140,7 @@ function addCreateEventThread(
   );
 }
 
-function addFinishThread(
-  convo: BotkitConversation<{}>
-) {
+function addFinishThread(convo) {
   convo.addAction("finish");
 
   convo.before("finish", async (convo, _bot) => {
@@ -152,7 +152,7 @@ function addFinishThread(
     const startTimeISO = getLocalISOString(startTime);
     const endTimeISO = getLocalISOString(parsedDate.end.date());
 
-    const createZoomMeetingRequest: ZoomCreateMeetingRequest = {
+    const createZoomMeetingRequest = {
       topic: convo.vars.title,
       agenda: convo.vars.description,
       start_time: startTimeISO,
@@ -174,8 +174,9 @@ function addFinishThread(
     convo.setVar("password", password);
 
     const gcalDescription = `${convo.vars.description}
-<hr /><b>Join Zoom meeting:</b> ${convo.vars.join_url}
-<b>Password:</b> ${convo.vars.password}`;
+
+Join Zoom meeting: ${convo.vars.join_url}
+Password: ${convo.vars.password}`;
 
     const gcalResponse = await googleCalendarClient.addEvent(
       {
@@ -193,39 +194,34 @@ function addFinishThread(
       }
     );
 
-   convo.setVar("calendar_link", gcalResponse.data.htmlLink);
-
-    console.log(gcalResponse);
+    convo.setVar("calendar_link", gcalResponse.data.htmlLink);
   });
 
   convo.addMessage("👍 I created your event.", "finish");
-  convo.addMessage(`**Host link**
-  <br />
-  Keep this private!
+  convo.addMessage(`*Host link*
 
-  <a href="{{vars.host_url}}">Start meeting as host</a>
+Keep this private! Use it to start the meeting and gain host privileges.
+
+>⚡ <{{vars.host_url}}|Start '{{vars.title}}' as host>
   `, "finish");
   convo.addMessage(
-    `**Share with attendees**
-
-<a href="{{vars.calendar_link}}">Google Calendar event</a>
-
-{{vars.title}}<br />
-{{vars.event_time_start}} - {{vars.event_time_end}}
-
-{{vars.description}}
-<hr />
-Join Zoom meeting: <a href="{{vars.join_url}}">{{vars.join_url}}</a><br />
-Password: {{vars.password}}`,
+    `*Share with attendees*
+<{{vars.calendar_link}}|'{{vars.title}}' on Google Calendar>
+>*{{vars.title}}*
+>{{vars.event_time_start}} - {{vars.event_time_end}}
+>
+>{{vars.description}}
+>
+>---
+>Join Zoom meeting: <{{vars.join_url}}>
+>Password: {{vars.password}}`,
     "finish"
   );
 
   convo.addAction("complete", "finish");
 }
 
-function generatePassword(
-  length: number
-): string {
+function generatePassword(length) {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
   let result = "";
@@ -236,9 +232,7 @@ function generatePassword(
   return result;
 }
 
-function getLocalISOString(
-  date: Date
-): string {
+function getLocalISOString(date) {
   const yyyy = date.getFullYear();
   const MM = (date.getMonth() + 1).toString().padStart(2, "0");
   const dd = date.getDate().toString().padStart(2, "0");
@@ -249,9 +243,7 @@ function getLocalISOString(
   return `${yyyy}-${MM}-${dd}T${hh}:${mm}:${ss}`;
 }
 
-function addCancelThread(
-  convo: BotkitConversation<{}>
-) {
+function addCancelThread(convo) {
   convo.addMessage("OK, never mind.", "cancel");
   convo.addAction("stop", "cancel");
 }
