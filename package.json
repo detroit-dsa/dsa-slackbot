@@ -7,13 +7,13 @@
   },
   "dependencies": {
     "axios": "^0.19.2",
-    "botbuilder-adapter-slack": "^1.0.10",
-    "botkit": "^4.6.2",
+    "botbuilder-adapter-slack": "^1.0.11",
+    "botkit": "^4.9.0",
     "botkit-plugin-cms": "^1.0.3",
-    "chrono-node": "^1.4.4",
-    "copyfiles": "^2.2.0",
-    "dotenv": "^7.0.0",
-    "googleapis": "^48.0.0",
+    "chrono-node": "^2.1.4",
+    "copyfiles": "^2.3.0",
+    "dotenv": "^8.2.0",
+    "googleapis": "^55.0.0",
     "he": "^1.2.0"
   },
   "devDependencies": {
