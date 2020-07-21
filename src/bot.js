@@ -1,5 +1,9 @@
 import { Botkit } from "botkit";
-import { SlackAdapter, SlackEventMiddleware, SlackMessageTypeMiddleware } from "botbuilder-adapter-slack";
+import {
+  SlackAdapter,
+  SlackEventMiddleware,
+  SlackMessageTypeMiddleware,
+} from "botbuilder-adapter-slack";
 import { decode } from "he";
 
 require("dotenv").config();
@@ -7,7 +11,7 @@ require("dotenv").config();
 function getAdapter() {
   const adapter = new SlackAdapter({
     clientSigningSecret: process.env.SLACK_CLIENT_SIGNING_SECRET,
-    botToken: process.env.SLACK_BOT_TOKEN
+    botToken: process.env.SLACK_BOT_TOKEN,
   });
 
   adapter.use(new SlackEventMiddleware());
@@ -18,7 +22,7 @@ function getAdapter() {
 
 const controller = new Botkit({
   webhook_uri: "/api/messages",
-  adapter: getAdapter()
+  adapter: getAdapter(),
 });
 
 controller.middleware.send.use((_bot, message, next) => {

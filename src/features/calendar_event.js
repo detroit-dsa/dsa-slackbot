@@ -1,6 +1,10 @@
 import { BotkitConversation } from "botkit";
 import * as chrono from "chrono-node";
-import { ZoomApiClient, ZoomMeetingType, ZoomMeetingApprovalType } from "../calendar-event/zoom";
+import {
+  ZoomApiClient,
+  ZoomMeetingType,
+  ZoomMeetingApprovalType,
+} from "../calendar-event/zoom";
 import { GoogleCalendarApiClient } from "../calendar-event/google-calendar";
 
 const CREATE_CALENDAR_EVENT_DIALOG_ID = "create_event";
@@ -8,27 +12,38 @@ const LIST_CALENDAR_EVENTS_DIALOG_ID = "list_events";
 const TIME_ZONE = "America/New_York";
 
 const zoomClient = new ZoomApiClient(process.env.ZOOM_JWT);
-const googleCalendarClient = new GoogleCalendarApiClient(process.env.GOOGLE_CALENDAR_ID, process.env.GOOGLE_JSON_CRED_PATH);
+const googleCalendarClient = new GoogleCalendarApiClient(
+  process.env.GOOGLE_CALENDAR_ID,
+  process.env.GOOGLE_JSON_CRED_PATH
+);
 
-const noopConvoHandler = async () => { };
+const noopConvoHandler = async () => {};
 
 export default function (controller) {
-  controller.interrupts(["quit", "cancel"], "direct_message", async (bot, message) => {
-    await bot.reply(message, "OK, never mind.");
-    await bot.cancelAllDialogs();
-  });
+  controller.interrupts(
+    ["quit", "cancel"],
+    "direct_message",
+    async (bot, message) => {
+      await bot.reply(message, "OK, never mind.");
+      await bot.cancelAllDialogs();
+    }
+  );
 
   addCreateEventDialog(controller);
   addListEventsDialog(controller);
 
-  controller.hears(["meeting"], ["direct_mention", "direct_message"], async (bot, message) => {
-    if (message.type !== "direct_message") {
-      await bot.replyEphemeral(message, "I'll DM you to get the details.")
-    }
+  controller.hears(
+    ["meeting"],
+    ["direct_mention", "direct_message"],
+    async (bot, message) => {
+      if (message.type !== "direct_message") {
+        await bot.replyEphemeral(message, "I'll DM you to get the details.");
+      }
 
-    await bot.startPrivateConversation(message.user);
-    await bot.beginDialog(CREATE_CALENDAR_EVENT_DIALOG_ID);
-  })
+      await bot.startPrivateConversation(message.user);
+      await bot.beginDialog(CREATE_CALENDAR_EVENT_DIALOG_ID);
+    }
+  );
 
   // controller.hears("list", "message,direct_mention,direct_message", async (bot, _message) => {
   //   bot.say("Looking up the next 10 events from Zoom...");
@@ -37,34 +52,38 @@ export default function (controller) {
 }
 
 function addListEventsDialog(controller) {
-  const convo = new BotkitConversation(LIST_CALENDAR_EVENTS_DIALOG_ID, controller);
+  const convo = new BotkitConversation(
+    LIST_CALENDAR_EVENTS_DIALOG_ID,
+    controller
+  );
   convo.addAction("list_events");
 
-  convo.before(
-    "list_events",
-    async (convo, _bot) => {
-      const zoomMeetings = await zoomClient.getScheduledMeetings();
-      // const googleEvents = await googleCalendarClient.getEvents();
+  convo.before("list_events", async (convo) => {
+    const zoomMeetings = await zoomClient.getScheduledMeetings();
+    // const googleEvents = await googleCalendarClient.getEvents();
 
-      const meetingsString = zoomMeetings.meetings
-        .sort((a, b) => +new Date(a.start_time) - +new Date(b.start_time))
-        .map(m => `${new Date(m.start_time).toLocaleString()} **${m.topic.trim()}**`)
-        .join("\n\n");
+    const meetingsString = zoomMeetings.meetings
+      .sort((a, b) => +new Date(a.start_time) - +new Date(b.start_time))
+      .map(
+        (m) =>
+          `${new Date(m.start_time).toLocaleString()} **${m.topic.trim()}**`
+      )
+      .join("\n\n");
 
-      convo.setVar("list_meetings_content", meetingsString);
-    });
+    convo.setVar("list_meetings_content", meetingsString);
+  });
 
-  convo.addMessage(
-    "{{vars.list_meetings_content}}",
-    "list_events"
-  );
+  convo.addMessage("{{vars.list_meetings_content}}", "list_events");
 
   controller.addDialog(convo);
   return convo;
 }
 
 function addCreateEventDialog(controller) {
-  const convo = new BotkitConversation(CREATE_CALENDAR_EVENT_DIALOG_ID, controller);
+  const convo = new BotkitConversation(
+    CREATE_CALENDAR_EVENT_DIALOG_ID,
+    controller
+  );
   addCreateEventThread(convo);
   addCancelThread(convo);
   addFinishThread(convo);
@@ -87,17 +106,33 @@ function addCreateEventThread(convo) {
   );
 
   convo.ask(
-    "When will the meeting happen? For example, say \"Friday from 5 to 6 PM\", \"March 1st, noon to 3\", or \"tomorrow at 8am to 8:30\".",
+    'When will the meeting happen? For example, say "Friday from 5 to 6 PM", "March 1st, noon to 3", or "tomorrow at 8am to 8:30".',
     async (res, convo, bot) => {
       const parsedDate = chrono.parse(res, new Date(), { forwardDate: true });
 
       if (!parsedDate || parsedDate.length != 1 || !parsedDate[0].end) {
-        bot.say("I didn't understand, or maybe you left out the end time. Try again.")
+        bot.say(
+          "I didn't understand, or maybe you left out the end time. Try again."
+        );
         await convo.repeat();
-      }
-      else {
-        convo.setVar("event_time_start", parsedDate[0].start.date().toLocaleString([], { weekday: "long", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }));
-        convo.setVar("event_time_end", parsedDate[0].end.date().toLocaleString([], { hour: "2-digit", minute: "2-digit" }));
+      } else {
+        convo.setVar(
+          "event_time_start",
+          parsedDate[0].start.date().toLocaleString([], {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        );
+
+        convo.setVar(
+          "event_time_end",
+          parsedDate[0].end
+            .date()
+            .toLocaleString([], { hour: "2-digit", minute: "2-digit" })
+        );
       }
     },
     { key: "event_time_text" }
@@ -108,8 +143,7 @@ function addCreateEventThread(convo) {
   convo.say(`
 *Title:* {{vars.title}}
 *Time:* {{vars.event_time_start}} - {{vars.event_time_end}}
-*Description:* {{vars.description}}`
-  );
+*Description:* {{vars.description}}`);
 
   const yesHandler = async (_answer, convo, bot) => {
     bot.say("Creating your meeting in Zoom and Google Calendar...");
@@ -118,7 +152,7 @@ function addCreateEventThread(convo) {
 
   convo.ask(
     {
-      text: ["Look good?"]
+      text: ["Look good?"],
     },
     [
       { pattern: "ok", handler: yesHandler },
@@ -131,8 +165,8 @@ function addCreateEventThread(convo) {
         handler: async (_answer, convo, bot) => {
           bot.say("OK, let's try that again.");
           convo.gotoThread("default");
-        }
-      }
+        },
+      },
     ],
     "approved"
   );
@@ -141,10 +175,14 @@ function addCreateEventThread(convo) {
 function addFinishThread(convo) {
   convo.addAction("finish");
 
-  convo.before("finish", async (convo, _bot) => {
-    const parsedDate = chrono.parse(convo.vars.event_time_text, new Date(), { forwardDate: true })[0];
+  convo.before("finish", async (convo) => {
+    const parsedDate = chrono.parse(convo.vars.event_time_text, new Date(), {
+      forwardDate: true,
+    })[0];
     const startTime = parsedDate.start.date();
-    const durationMinutes = Math.ceil((+parsedDate.end.date() - +parsedDate.start.date()) / 60000);
+    const durationMinutes = Math.ceil(
+      (+parsedDate.end.date() - +parsedDate.start.date()) / 60000
+    );
     const password = generatePassword(8);
 
     const startTimeISO = getLocalISOString(startTime);
@@ -162,8 +200,8 @@ function addFinishThread(convo) {
         approval_type: ZoomMeetingApprovalType.NoRegistrationRequired,
         join_before_host: true,
         waiting_room: false,
-        mute_upon_entry: true
-      }
+        mute_upon_entry: true,
+      },
     };
 
     let zoomResponse;
@@ -182,36 +220,36 @@ Join Zoom meeting: ${convo.vars.join_url}
 Password: ${convo.vars.password}`;
 
     try {
-      const gcalResponse = await googleCalendarClient.addEvent(
-        {
-          summary: convo.vars.title,
-          description: gcalDescription,
-          start: {
-            dateTime: startTimeISO,
-            timeZone: TIME_ZONE
-          },
-          end: {
-            dateTime: endTimeISO,
-            timeZone: TIME_ZONE
-          },
-          location: zoomResponse.join_url
-        }
-      );
+      const gcalResponse = await googleCalendarClient.addEvent({
+        summary: convo.vars.title,
+        description: gcalDescription,
+        start: {
+          dateTime: startTimeISO,
+          timeZone: TIME_ZONE,
+        },
+        end: {
+          dateTime: endTimeISO,
+          timeZone: TIME_ZONE,
+        },
+        location: zoomResponse.join_url,
+      });
 
       convo.setVar("calendar_link", gcalResponse.data.htmlLink);
-
     } catch (error) {
       console.error("Failed to add to Google Calendar.", error);
     }
   });
 
   convo.addMessage("👍 I created your event.", "finish");
-  convo.addMessage(`*Host link*
+  convo.addMessage(
+    `*Host link*
 
 Keep this private! Use it to start the meeting and gain host privileges.
 
 >⚡ <{{vars.host_url}}|Start '{{vars.title}}' as host>
-  `, "finish");
+  `,
+    "finish"
+  );
   convo.addMessage(
     `*Share with attendees*
 <{{vars.calendar_link}}|'{{vars.title}}' on Google Calendar>
@@ -230,7 +268,8 @@ Keep this private! Use it to start the meeting and gain host privileges.
 }
 
 function generatePassword(length) {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
   let result = "";
   for (var i = 0; i < length; i++) {

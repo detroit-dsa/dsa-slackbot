@@ -26,5 +26,5 @@ export class ZoomApiClient {
   }
 }
 
-export { ZoomMeetingType as ZoomMeetingType } from "./ZoomMeetingType";
-export { ZoomMeetingApprovalType as ZoomMeetingApprovalType } from "./ZoomMeetingApprovalType";
+export { ZoomMeetingType } from "./ZoomMeetingType";
+export { ZoomMeetingApprovalType } from "./ZoomMeetingApprovalType";
