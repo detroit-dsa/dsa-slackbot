@@ -1,17 +1,9 @@
-import { google, calendar_v3 } from "googleapis";
-import { JWT } from "google-auth-library/build/src/auth/jwtclient";
-import { GaxiosResponse } from "gaxios";
+import { google } from "googleapis";
 
 export class GoogleCalendarApiClient {
-  private _calendarApi: calendar_v3.Calendar;
-  private _jwtClient: JWT;
-  private _jwtClientauthorized: boolean;
-
-  constructor(
-    private _calendarId: string,
-    jsonCredPath: string
-  ) {
+  constructor(calendarId, jsonCredPath) {
     this._jwtClientauthorized = false;
+    this._calendarId = calendarId;
 
     const jsonCred = require(jsonCredPath);
     this._jwtClient = new google.auth.JWT(
@@ -24,9 +16,8 @@ export class GoogleCalendarApiClient {
     this._calendarApi = google.calendar({ version: "v3", auth: this._jwtClient });
   }
 
-  public async getEvents(
-  ): Promise<calendar_v3.Schema$Event[]> {
-    await this.ensureJwtClientIsAuthorized();
+  async getEvents() {
+    await this._ensureJwtClientIsAuthorized();
 
     const response = await this._calendarApi.events.list(
       {
@@ -45,10 +36,8 @@ export class GoogleCalendarApiClient {
     return [];
   }
 
-  public async addEvent(
-    request: calendar_v3.Schema$Event
-  ): Promise<GaxiosResponse<calendar_v3.Schema$Event>> {
-    await this.ensureJwtClientIsAuthorized();
+  async addEvent(request) {
+    await this._ensureJwtClientIsAuthorized();
 
     const response = await this._calendarApi.events.insert(
       {
@@ -61,8 +50,8 @@ export class GoogleCalendarApiClient {
 
   // Can't run an async method from the constructor, so this has to be called
   // from some other async context before using the JWT client.
-  private async ensureJwtClientIsAuthorized(
-  ): Promise<JWT> {
+  async _ensureJwtClientIsAuthorized(
+  ) {
     if (!this._jwtClientauthorized) {
       await this._jwtClient.authorize();
       this._jwtClientauthorized = true;

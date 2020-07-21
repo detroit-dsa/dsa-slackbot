@@ -1,8 +1,6 @@
 import { BotkitConversation } from "botkit";
 import * as chrono from "chrono-node";
-import { ZoomApiClient } from "../calendar-event/zoom";
-import { ZoomMeetingType } from "../calendar-event/zoom/api-interfaces/ZoomMeetingType";
-import { ZoomMeetingApprovalType } from "../calendar-event/zoom/api-interfaces/ZoomMeetingApprovalType";
+import { ZoomApiClient, ZoomMeetingType, ZoomMeetingApprovalType } from "../calendar-event/zoom";
 import { GoogleCalendarApiClient } from "../calendar-event/google-calendar";
 
 const CREATE_CALENDAR_EVENT_DIALOG_ID = "create_event";
@@ -168,33 +166,43 @@ function addFinishThread(convo) {
       }
     };
 
-    const zoomResponse = await zoomClient.createMeeting(createZoomMeetingRequest);
-    convo.setVar("host_url", zoomResponse.start_url);
-    convo.setVar("join_url", zoomResponse.join_url);
-    convo.setVar("password", password);
+    let zoomResponse;
+    try {
+      zoomResponse = await zoomClient.createMeeting(createZoomMeetingRequest);
+      convo.setVar("host_url", zoomResponse.start_url);
+      convo.setVar("join_url", zoomResponse.join_url);
+      convo.setVar("password", password);
+    } catch (error) {
+      console.error("Failed to add to Zoom.", error);
+    }
 
     const gcalDescription = `${convo.vars.description}
 
 Join Zoom meeting: ${convo.vars.join_url}
 Password: ${convo.vars.password}`;
 
-    const gcalResponse = await googleCalendarClient.addEvent(
-      {
-        summary: convo.vars.title,
-        description: gcalDescription,
-        start: {
-          dateTime: startTimeISO,
-          timeZone: TIME_ZONE
-        },
-        end: {
-          dateTime: endTimeISO,
-          timeZone: TIME_ZONE
-        },
-        location: zoomResponse.join_url
-      }
-    );
+    try {
+      const gcalResponse = await googleCalendarClient.addEvent(
+        {
+          summary: convo.vars.title,
+          description: gcalDescription,
+          start: {
+            dateTime: startTimeISO,
+            timeZone: TIME_ZONE
+          },
+          end: {
+            dateTime: endTimeISO,
+            timeZone: TIME_ZONE
+          },
+          location: zoomResponse.join_url
+        }
+      );
 
-    convo.setVar("calendar_link", gcalResponse.data.htmlLink);
+      convo.setVar("calendar_link", gcalResponse.data.htmlLink);
+
+    } catch (error) {
+      console.error("Failed to add to Google Calendar.", error);
+    }
   });
 
   convo.addMessage("👍 I created your event.", "finish");

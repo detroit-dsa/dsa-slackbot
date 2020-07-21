@@ -1,14 +1,9 @@
 {
   "name": "dsa-slackbot",
   "version": "1.0.0",
-  "main": "./dist/bot.js",
+  "main": "bot.js",
   "scripts": {
-    "build": "tsc && npm run copy",
-    "copy": "npm run copy:package & npm run copy:site",
-    "copy:package": "copyfiles package.json package-lock.json dist/",
-    "copy:site": "copyfiles src/public/**/* src/sass/**/* dist/ --up 1",
-    "prestart": "npm run copy",
-    "start:dev": "tsc-watch --onSuccess \"node dist/bot.js\""
+    "start:dev": "nodemon --exec babel-node src/bot.js"
   },
   "dependencies": {
     "axios": "^0.19.2",
@@ -22,12 +17,10 @@
     "he": "^1.2.0"
   },
   "devDependencies": {
-    "@types/he": "^1.1.1",
-    "@typescript-eslint/eslint-plugin": "^2.25.0",
-    "@typescript-eslint/parser": "^2.25.0",
-    "eslint": "^6.8.0",
-    "eslint-plugin-import": "^2.20.1",
-    "tsc-watch": "^4.2.3",
-    "typescript": "^3.8.3"
+    "@babel/core": "^7.10.5",
+    "@babel/node": "^7.10.5",
+    "@babel/preset-env": "^7.10.4",
+    "eslint": "^7.5.0",
+    "nodemon": "^2.0.4"
   }
 }
