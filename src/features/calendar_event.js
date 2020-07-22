@@ -7,6 +7,17 @@ import {
 } from "../calendar-event/zoom";
 import { GoogleCalendarApiClient } from "../calendar-event/google-calendar";
 
+if (
+  !process.env.ZOOM_JWT ||
+  !process.env.GOOGLE_CALENDAR_ID ||
+  !process.env.GOOGLE_JSON_CRED_PATH
+) {
+  throw (
+    "Required environment variables for Zoom or Google Calendar are not defined. " +
+    "Please check the documentation and ensure that all required variables are set."
+  );
+}
+
 const CREATE_CALENDAR_EVENT_DIALOG_ID = "create_event";
 const LIST_CALENDAR_EVENTS_DIALOG_ID = "list_events";
 const TIME_ZONE = "America/New_York";
@@ -33,7 +44,7 @@ export default function (controller) {
   addListEventsDialog(controller);
 
   controller.hears(
-    ["meeting"],
+    ["zoom", "meeting"],
     ["direct_mention", "direct_message"],
     async (bot, message) => {
       if (message.type !== "direct_message") {
@@ -252,7 +263,7 @@ Keep this private! Use it to start the meeting and gain host privileges.
   );
   convo.addMessage(
     `*Share with attendees*
-<{{vars.calendar_link}}|'{{vars.title}}' on Google Calendar>
+<{{vars.calendar_link}}|"{{vars.title}}" on Google Calendar>
 >*{{vars.title}}*
 >{{vars.event_time_start}} - {{vars.event_time_end}}
 >

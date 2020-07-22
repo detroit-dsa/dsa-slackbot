@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "bot.js",
   "scripts": {
-    "start:dev": "nodemon --exec babel-node src/bot.js"
+    "start:dev": "nodemon --exec babel-node src/bot.js",
+    "start": "babel-node src/bot.js"
   },
   "dependencies": {
     "axios": "^0.19.2",

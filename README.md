@@ -1,7 +1,7 @@
 # Detroit DSA Slack bot
 
 ## Development
-You must first set up all the required API configurations for the app to initialize correctly.
+You must first set up the required API configurations for Slack, Zoom, and Google Calendar.
 
 Set environment variables in a file named `.env` at the root of the repo. Copy `.env.example` to get started. Required environment variables are specified below with a ✳.
 
@@ -23,8 +23,8 @@ Set environment variables in a file named `.env` at the root of the repo. Copy `
   * Enable the Calendar API: <https://console.developers.google.com/apis/library/calendar-json.googleapis.com>
   * Create a service account: <https://console.developers.google.com/apis/credentials>
     * No special roles/permissions required
-    * Generate credentials as JSON
-* ✳ Set the `GOOGLE_JSON_CRED_PATH` environment variable to the fully qualified path (not the relative path) to the `google-privatekey.json` file you downloaded.
+    * After the account is created, click on it and find the **Keys** section. Add a key and choose **JSON**.
+* ✳ Set the `GOOGLE_JSON_CRED_PATH` environment variable to the fully qualified path (not the relative path) to the `.json` file you downloaded.
 * Go to the sharing settings of the calendar you created and add the service account to the list of editors.
   * The service account you created has an email address associated with it - it should be something like `myserviceaccount@myapp-123.iam.gserviceaccount.com`.
   * In the calendar's sharing settings, add this email address under **Share with specific people** and make sure it's set to **Make changes to events**.

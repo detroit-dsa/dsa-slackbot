@@ -8,21 +8,24 @@ import { decode } from "he";
 
 require("dotenv").config();
 
-function getAdapter() {
-  const adapter = new SlackAdapter({
-    clientSigningSecret: process.env.SLACK_CLIENT_SIGNING_SECRET,
-    botToken: process.env.SLACK_BOT_TOKEN,
-  });
-
-  adapter.use(new SlackEventMiddleware());
-  adapter.use(new SlackMessageTypeMiddleware());
-
-  return adapter;
+if (!process.env.SLACK_CLIENT_SIGNING_SECRET || !process.env.SLACK_BOT_TOKEN) {
+  throw (
+    "Required environment variables for Slack are not defined. " +
+    "Please check the documentation and ensure that all required variables are set."
+  );
 }
+
+const adapter = new SlackAdapter({
+  clientSigningSecret: process.env.SLACK_CLIENT_SIGNING_SECRET,
+  botToken: process.env.SLACK_BOT_TOKEN,
+});
+
+adapter.use(new SlackEventMiddleware());
+adapter.use(new SlackMessageTypeMiddleware());
 
 const controller = new Botkit({
   webhook_uri: "/api/messages",
-  adapter: getAdapter(),
+  adapter: adapter,
 });
 
 controller.middleware.send.use((_bot, message, next) => {
