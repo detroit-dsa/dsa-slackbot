@@ -1,15 +1,14 @@
 import { google } from "googleapis";
 
 export class GoogleCalendarApiClient {
-  constructor(calendarId, jsonCredPath) {
+  constructor(calendarId, googleClientEmail, googlePrivateKey) {
     this._jwtClientauthorized = false;
     this._calendarId = calendarId;
 
-    const jsonCred = require(jsonCredPath);
     this._jwtClient = new google.auth.JWT(
-      jsonCred.client_email,
+      googleClientEmail,
       undefined,
-      jsonCred.private_key,
+      googlePrivateKey,
       ["https://www.googleapis.com/auth/calendar"]
     );
 

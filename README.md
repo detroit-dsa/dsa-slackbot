@@ -13,7 +13,7 @@ Set environment variables in a file named `.env` at the root of the repo. Copy `
 
 ### Google Calendar API setup
 * Open Google Calendar, go to the settings, and create a new calendar to use for testing.
-* ✳ In the **Integrate Calendar** section of your calendar's settings, find the **Calendar ID**. Set the `GOOGLE_CALENDAR_ID` to this value.
+* ✳ In the **Integrate Calendar** section of your calendar's settings, find the **Calendar ID**. Set the `GOOGLE_CALENDAR_ID` environment variable to this value.
 * Generate a service account that can access Google Calendar. Generate credentials for it and save them to your computer.
   * Start here: <https://console.developers.google.com/>
   * This part takes some effort. Here are some guides to get Google Calendar set up the way we need it:
@@ -24,7 +24,8 @@ Set environment variables in a file named `.env` at the root of the repo. Copy `
   * Create a service account: <https://console.developers.google.com/apis/credentials>
     * No special roles/permissions required
     * After the account is created, click on it and find the **Keys** section. Add a key and choose **JSON**.
-* ✳ Set the `GOOGLE_JSON_CRED_PATH` environment variable to the fully qualified path (not the relative path) to the `.json` file you downloaded.
+* ✳ Find the `"client_email"` value in the `.json` file you downloaded. Set the `GOOGLE_SERVICE_ACCOUNT_CLIENT_EMAIL` environment variable to this value.
+* ✳ Find the `"private_key"` value in the `.json` file you downloaded. Set the `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` environment variable to this value.
 * Go to the sharing settings of the calendar you created and add the service account to the list of editors.
   * The service account you created has an email address associated with it - it should be something like `myserviceaccount@myapp-123.iam.gserviceaccount.com`.
   * In the calendar's sharing settings, add this email address under **Share with specific people** and make sure it's set to **Make changes to events**.
@@ -36,6 +37,7 @@ Set environment variables in a file named `.env` at the root of the repo. Copy `
 * To make the Slack instance talk to your local app, you need a public URL that Slack can talk to. Use [ngrok](https://ngrok.com/) to set this up.
   * By default the bot listens on port `3000`, so run `ngrok http 3000`.
 * Go to the **Features > Event Subscriptions** page in your Slack app configuration and set the **Request URL** to <http://YOURAPP.ngrok.io/api/messages>
+* On the **Event Subscriptions** page, open the **Subscribe to bot events** section and subscribe to the `app_mention` and `message.im` events.
 * ✳ Go to the **OAuth & Permissions** page in your Slack app configuration and find the **bot token**. Set the `SLACK_BOT_TOKEN` environment variable to this value.
 * ✳ Go to the **Basic Information** page in your Slack app configuration and find the **Signing Secret**. Set the `SLACK_CLIENT_SIGNING_SECRET` environment variable to this value.
 

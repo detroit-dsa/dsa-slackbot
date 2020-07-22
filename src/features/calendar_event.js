@@ -10,7 +10,8 @@ import { GoogleCalendarApiClient } from "../calendar-event/google-calendar";
 if (
   !process.env.ZOOM_JWT ||
   !process.env.GOOGLE_CALENDAR_ID ||
-  !process.env.GOOGLE_JSON_CRED_PATH
+  !process.env.GOOGLE_SERVICE_ACCOUNT_CLIENT_EMAIL ||
+  !process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
 ) {
   throw (
     "Required environment variables for Zoom or Google Calendar are not defined. " +
@@ -25,7 +26,8 @@ const TIME_ZONE = "America/New_York";
 const zoomClient = new ZoomApiClient(process.env.ZOOM_JWT);
 const googleCalendarClient = new GoogleCalendarApiClient(
   process.env.GOOGLE_CALENDAR_ID,
-  process.env.GOOGLE_JSON_CRED_PATH
+  process.env.GOOGLE_SERVICE_ACCOUNT_CLIENT_EMAIL,
+  process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
 );
 
 const noopConvoHandler = async () => {};
@@ -254,10 +256,8 @@ Password: ${convo.vars.password}`;
   convo.addMessage("👍 I created your event.", "finish");
   convo.addMessage(
     `*Host link*
-
 Keep this private! Use it to start the meeting and gain host privileges.
-
->⚡ <{{vars.host_url}}|Start '{{vars.title}}' as host>
+>⚡ <{{vars.host_url}}|Start "{{vars.title}}" as host>
   `,
     "finish"
   );
