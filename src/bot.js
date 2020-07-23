@@ -28,9 +28,19 @@ const controller = new Botkit({
   adapter: adapter,
 });
 
+const heardMessages = new Set();
 controller.middleware.receive.use((_bot, message, next) => {
   if (process.env.DEBUG) {
     console.log(message);
+  }
+
+  if (message.ts) {
+    if (heardMessages.has(message.ts)) {
+      console.log(`Skipping duplicate message with timestamp '${message.ts}'`);
+      return;
+    }
+
+    heardMessages.add(message.ts);
   }
 
   next();
