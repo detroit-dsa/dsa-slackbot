@@ -30,7 +30,7 @@ const googleCalendarClient = new GoogleCalendarApiClient(
   process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
 );
 
-const noopConvoHandler = async () => {};
+const noopConvoHandler = async () => { };
 const triggers = ["zoom", "meeting"];
 
 export default function (controller) {
@@ -70,6 +70,8 @@ export default function (controller) {
 }
 
 async function startCreateEventDialog(bot, userId) {
+  console.log("Starting meeting creation dialog with " + userId);
+
   try {
     await bot.startPrivateConversation(userId);
   } catch (error) {
@@ -88,7 +90,7 @@ function addListEventsDialog(controller) {
 
   convo.before("list_events", async (convo) => {
     let zoomMeetings = [];
-    let googleEvents = [];
+    // let googleEvents = [];
     try {
       zoomMeetings = await zoomClient.getScheduledMeetings();
       // googleEvents = await googleCalendarClient.getEvents();
