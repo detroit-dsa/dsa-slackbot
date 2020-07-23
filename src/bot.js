@@ -3,7 +3,7 @@ import {
   SlackAdapter,
   SlackEventMiddleware,
   SlackMessageTypeMiddleware,
-} from "botbuilder-adapter-slack";
+} from "@ajhall/botbuilder-adapter-slack";
 import { decode } from "he";
 
 require("dotenv").config();
@@ -26,6 +26,14 @@ adapter.use(new SlackMessageTypeMiddleware());
 const controller = new Botkit({
   webhook_uri: "/api/messages",
   adapter: adapter,
+});
+
+controller.middleware.receive.use((_bot, message, next) => {
+  if (process.env.DEBUG) {
+    console.log(message);
+  }
+
+  next();
 });
 
 controller.middleware.send.use((_bot, message, next) => {

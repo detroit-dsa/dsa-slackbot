@@ -31,10 +31,31 @@ const googleCalendarClient = new GoogleCalendarApiClient(
 );
 
 const noopConvoHandler = async () => {};
+const triggers = ["zoom", "meeting"];
 
 export default function (controller) {
+  addCreateEventDialog(controller);
+  addListEventsDialog(controller);
+
+  controller.on("app_mention", async (bot, message) => {
+    const mentionText = message.incoming_message.channelData.text;
+    if (triggers.some((t) => mentionText.includes(t))) {
+      try {
+        await bot.replyEphemeral(message, "I'll DM you to get the details.");
+      } catch (error) {
+        console.error(error);
+      }
+
+      await startCreateEventDialog(bot, message.user);
+    }
+  });
+
+  controller.hears(triggers, ["direct_message"], async (bot, message) => {
+    await startCreateEventDialog(bot, message.user);
+  });
+
   controller.interrupts(
-    ["quit", "cancel"],
+    ["quit", "cancel", "never mind", "nevermind"],
     "direct_message",
     async (bot, message) => {
       await bot.reply(message, "OK, never mind.");
@@ -42,26 +63,20 @@ export default function (controller) {
     }
   );
 
-  addCreateEventDialog(controller);
-  addListEventsDialog(controller);
-
-  controller.hears(
-    ["zoom", "meeting"],
-    ["direct_mention", "direct_message"],
-    async (bot, message) => {
-      if (message.type !== "direct_message") {
-        await bot.replyEphemeral(message, "I'll DM you to get the details.");
-      }
-
-      await bot.startPrivateConversation(message.user);
-      await bot.beginDialog(CREATE_CALENDAR_EVENT_DIALOG_ID);
-    }
-  );
-
   // controller.hears("list", "message,direct_mention,direct_message", async (bot, _message) => {
   //   bot.say("Looking up the next 10 events from Zoom...");
   //   await bot.beginDialog(LIST_CALENDAR_EVENTS_DIALOG_ID);
   // });
+}
+
+async function startCreateEventDialog(bot, userId) {
+  try {
+    await bot.startPrivateConversation(userId);
+  } catch (error) {
+    console.error(error);
+  }
+
+  await bot.beginDialog(CREATE_CALENDAR_EVENT_DIALOG_ID);
 }
 
 function addListEventsDialog(controller) {
@@ -72,8 +87,18 @@ function addListEventsDialog(controller) {
   convo.addAction("list_events");
 
   convo.before("list_events", async (convo) => {
-    const zoomMeetings = await zoomClient.getScheduledMeetings();
-    // const googleEvents = await googleCalendarClient.getEvents();
+    let zoomMeetings = [];
+    let googleEvents = [];
+    try {
+      zoomMeetings = await zoomClient.getScheduledMeetings();
+      // googleEvents = await googleCalendarClient.getEvents();
+    } catch (error) {
+      console.error("Failed while trying to retrieve meetings.", error);
+    }
+
+    if (!zoomMeetings) {
+      return;
+    }
 
     const meetingsString = zoomMeetings.meetings
       .sort((a, b) => +new Date(a.start_time) - +new Date(b.start_time))
@@ -257,8 +282,7 @@ Password: ${convo.vars.password}`;
   convo.addMessage(
     `*Host link*
 Keep this private! Use it to start the meeting and gain host privileges.
->⚡ <{{vars.host_url}}|Start "{{vars.title}}" as host>
-  `,
+>⚡ <{{vars.host_url}}|Start "{{vars.title}}" as host>`,
     "finish"
   );
   convo.addMessage(

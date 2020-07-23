@@ -38,7 +38,16 @@ Set environment variables in a file named `.env` at the root of the repo. Copy `
   * By default the bot listens on port `3000`, so run `ngrok http 3000`.
 * Go to the **Features > Event Subscriptions** page in your Slack app configuration and set the **Request URL** to <http://YOURAPP.ngrok.io/api/messages>
 * On the **Event Subscriptions** page, open the **Subscribe to bot events** section and subscribe to the `app_mention` and `message.im` events.
-* ✳ Go to the **OAuth & Permissions** page in your Slack app configuration and find the **bot token**. Set the `SLACK_BOT_TOKEN` environment variable to this value.
+* On the **OAuth & Permissions** page, find **Bot Token Scopes**. Add OAuth scopes for:
+  * `app_mentions:read`
+  * `channels:read`
+  * `chat:write`
+  * `im:history`
+  * `im:read`
+  * `im:write`
+  * `mpim:write`
+* On the **OAuth & Permissions** page, install the bot to your workspace.
+* ✳ On the **OAuth & Permissions** page, find the **bot token**. Set the `SLACK_BOT_TOKEN` environment variable to this value.
 * ✳ Go to the **Basic Information** page in your Slack app configuration and find the **Signing Secret**. Set the `SLACK_CLIENT_SIGNING_SECRET` environment variable to this value.
 
 ### Local environment setup

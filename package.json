@@ -8,9 +8,9 @@
     "start": "node dist/bot.js"
   },
   "dependencies": {
+    "@ajhall/botbuilder-adapter-slack": "^1.0.13",
     "@babel/runtime": "^7.10.5",
     "axios": "^0.19.2",
-    "botbuilder-adapter-slack": "^1.0.11",
     "botkit": "^4.9.0",
     "chrono-node": "^2.1.4",
     "dotenv": "^8.2.0",
