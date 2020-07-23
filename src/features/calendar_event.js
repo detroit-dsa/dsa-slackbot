@@ -38,6 +38,8 @@ export default function (controller) {
   addListEventsDialog(controller);
 
   controller.on("app_mention", async (bot, message) => {
+    console.log(`Heard a mention from ${message.user}`);
+
     const mentionText = message.incoming_message.channelData.text;
     if (triggers.some((t) => mentionText.includes(t))) {
       try {
@@ -51,6 +53,7 @@ export default function (controller) {
   });
 
   controller.hears(triggers, ["direct_message"], async (bot, message) => {
+    console.log(`Heard a direct message from ${message.user}`);
     await startCreateEventDialog(bot, message.user);
   });
 
@@ -70,7 +73,7 @@ export default function (controller) {
 }
 
 async function startCreateEventDialog(bot, userId) {
-  console.log("Starting meeting creation dialog with " + userId);
+  console.log(`Starting meeting creation dialog with ${userId}`);
 
   try {
     await bot.startPrivateConversation(userId);
@@ -244,6 +247,9 @@ function addFinishThread(convo) {
       },
     };
 
+    console.log("Creating Zoom meeting:", createZoomMeetingRequest);
+
+
     let zoomResponse;
     try {
       zoomResponse = await zoomClient.createMeeting(createZoomMeetingRequest);
@@ -259,21 +265,24 @@ function addFinishThread(convo) {
 Join Zoom meeting: ${convo.vars.join_url}
 Password: ${convo.vars.password}`;
 
-    try {
-      const gcalResponse = await googleCalendarClient.addEvent({
-        summary: convo.vars.title,
-        description: gcalDescription,
-        start: {
-          dateTime: startTimeISO,
-          timeZone: TIME_ZONE,
-        },
-        end: {
-          dateTime: endTimeISO,
-          timeZone: TIME_ZONE,
-        },
-        location: zoomResponse.join_url,
-      });
+    const createGcalMeetingRequest = {
+      summary: convo.vars.title,
+      description: gcalDescription,
+      start: {
+        dateTime: startTimeISO,
+        timeZone: TIME_ZONE,
+      },
+      end: {
+        dateTime: endTimeISO,
+        timeZone: TIME_ZONE,
+      },
+      location: zoomResponse.join_url,
+    };
 
+    console.log("Creating GCal meeting:", createGcalMeetingRequest);
+
+    try {
+      const gcalResponse = await googleCalendarClient.addEvent(createGcalMeetingRequest);
       convo.setVar("calendar_link", gcalResponse.data.htmlLink);
     } catch (error) {
       console.error("Failed to add to Google Calendar.", error);
@@ -328,6 +337,8 @@ function getLocalISOString(date) {
 }
 
 function addCancelThread(convo) {
+  console.log("Cancelling conversation:", convo);
+
   convo.addMessage("OK, never mind.", "cancel");
   convo.addAction("stop", "cancel");
 }
