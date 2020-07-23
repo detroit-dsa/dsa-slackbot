@@ -249,7 +249,6 @@ function addFinishThread(convo) {
 
     console.log("Creating Zoom meeting:", createZoomMeetingRequest);
 
-
     let zoomResponse;
     try {
       zoomResponse = await zoomClient.createMeeting(createZoomMeetingRequest);
@@ -337,8 +336,6 @@ function getLocalISOString(date) {
 }
 
 function addCancelThread(convo) {
-  console.log("Cancelling conversation:", convo);
-
   convo.addMessage("OK, never mind.", "cancel");
   convo.addAction("stop", "cancel");
 }
