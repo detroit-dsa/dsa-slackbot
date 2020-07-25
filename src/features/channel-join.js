@@ -5,7 +5,7 @@
 // - chat:write
 // - channels:read
 
-import * as channelJoinMessages from "../auto-messages/channel-join.json";
+import * as channelJoinMessages from "../../auto-messages/channel-join.json";
 
 export default function (controller) {
   controller.on("member_joined_channel", async (bot, message) => {

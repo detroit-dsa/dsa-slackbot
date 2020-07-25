@@ -15,7 +15,7 @@ Channel join messages are sent to the channel as an [ephemeral message](https://
 }
 ```
 
-## [new-slack-member.json](channel-join.json)
+## [new-slack-member.json](new-slack-member.json)
 The new member message is sent as a direct message from the bot to every member who joins the Slack workspace.
 
 ```json
