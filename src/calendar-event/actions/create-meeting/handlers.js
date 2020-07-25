@@ -12,9 +12,13 @@ export async function retry(_answer, convo, bot) {
 export async function timeInput(res, convo, bot) {
   const parsedDate = chrono.parse(res, new Date(), { forwardDate: true });
 
-  if (!parsedDate || parsedDate.length != 1 || !parsedDate[0].end) {
-    bot.say(
-      "I didn't understand, or maybe you left out the end time. Try again."
+  if (!parsedDate || parsedDate.length != 1) {
+    await bot.say("Sorry, I didn't understand. Try again.");
+
+    await convo.repeat();
+  } else if (!parsedDate[0].end) {
+    await bot.say(
+      "I understood the start time, but I also need to know when the meeting should end. Please try again."
     );
 
     await convo.repeat();

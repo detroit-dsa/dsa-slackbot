@@ -23,7 +23,10 @@ const appMentionHandler = async (bot, message) => {
   const mentionText = message.incoming_message.channelData.text;
   if (newMeetingTriggers.some((t) => mentionText.includes(t))) {
     try {
-      await bot.replyEphemeral(message, "I'll DM you to get the details.");
+      await bot.reply(
+        message,
+        `<@${message.incoming_message.from.id}> I'll DM you to get the details.`
+      );
     } catch (error) {
       console.error(error);
     }
