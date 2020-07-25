@@ -1,3 +1,14 @@
+// Required event subscriptions:
+// - app_mention
+// - message.im
+
+// Required permission scopes:
+// - app_mentions:read
+// - chat:write
+// - im:read
+// - im:write
+// - mpim:write
+
 import * as createMeeting from "../calendar-event/actions/create-meeting";
 import { helpMessages } from "./help";
 

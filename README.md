@@ -36,6 +36,8 @@ Set environment variables in a file named `.env` at the root of the repo. Copy `
   * Open the **Subscribe to bot events** section and subscribe to the following events:
     * `app_mention`
     * `message.im`
+    * `member_joined_channel`
+    * `team_join`
 * Go to the **Features > OAuth & Permissions** page in your Slack app configuration.
   * Find **Bot Token Scopes**. Add OAuth scopes for:
     * `app_mentions:read`
