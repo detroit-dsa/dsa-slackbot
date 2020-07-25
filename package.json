@@ -14,7 +14,6 @@
     "botkit": "^4.9.0",
     "chrono-node": "^2.1.4",
     "dotenv": "^8.2.0",
-    "find-config": "^1.0.0",
     "googleapis": "^55.0.0",
     "he": "^1.2.0"
   },
