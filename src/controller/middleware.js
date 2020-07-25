@@ -1,7 +1,7 @@
 import { decode } from "he";
 
 const heardMessages = new Set();
-export const receiveMiddleware = (_bot, message, next) => {
+export function receive(_bot, message, next) {
   if (process.env.DEBUG) {
     console.log(message);
   }
@@ -16,12 +16,12 @@ export const receiveMiddleware = (_bot, message, next) => {
   }
 
   next();
-};
+}
 
-export const sendMiddleware = (_bot, message, next) => {
+export function send(_bot, message, next) {
   // Decode outgoing messages to make sure there are no weird URI encoded characters.
   // Encoding happens automatically sometimes for unknown reasons.
   message.text = decode(message.text);
 
   next();
-};
+}
