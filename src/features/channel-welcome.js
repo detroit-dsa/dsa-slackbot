@@ -5,7 +5,8 @@
 // - chat:write
 // - channels:read
 
-import * as channelJoinMessages from "../../auto-messages/channel-join.json";
+import * as channelJoinMessages from "../../welcome-messages/channel-welcome.json";
+import { getChannelName } from "../shared/slack-api";
 
 export default function (controller) {
   controller.on("member_joined_channel", async (bot, message) => {
@@ -20,12 +21,4 @@ export default function (controller) {
       await bot.replyEphemeral(message, channelJoinMessages[channelName]);
     }
   });
-}
-
-async function getChannelName(bot, message) {
-  const channelInfo = await bot.api.conversations.info({
-    channel: message.channel,
-  });
-
-  return channelInfo.channel.name;
 }

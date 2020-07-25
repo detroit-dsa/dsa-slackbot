@@ -1,10 +1,10 @@
-# Auto messages
+# Welcome messages
 These messages will be sent automatically to users when they join Slack for the first time or join a channel. Use the [formatting syntax](https://api.slack.com/reference/surfaces/formatting) described in Slack's documentation to format your message, add links, and so on.
 
 Note that linking to other channels requires you to look up a [special identifier](https://api.slack.com/reference/surfaces/formatting#linking-channels) to build the link.
 
-## [channel-join.json](channel-join.json)
-Channel join messages are sent to the channel as an [ephemeral message](https://api.slack.com/messaging/managing#ephemeral) that only the newly joined user can see.
+## [channel-welcome.json](channel-welcome.json)
+Channel welcome messages are sent to the channel as an [ephemeral message](https://api.slack.com/messaging/managing#ephemeral) that only the newly joined user can see.
 
 ```json
 {
@@ -15,8 +15,8 @@ Channel join messages are sent to the channel as an [ephemeral message](https://
 }
 ```
 
-## [new-slack-member.json](new-slack-member.json)
-The new member message is sent as a direct message from the bot to every member who joins the Slack workspace.
+## [workspace-welcome.json](workspace-welcome.json)
+The workspace welcome message is sent as a direct message from the bot to every member who joins the Slack workspace.
 
 ```json
 {

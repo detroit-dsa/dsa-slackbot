@@ -5,7 +5,7 @@
 // - im:write
 // - mpim:write
 
-import * as newMemberMessage from "../../auto-messages/new-slack-member.json";
+import * as newMemberMessage from "../../welcome-messages/workspace-welcome.json";
 
 export default function (controller) {
   controller.on("team_join", async (bot, message) => {
