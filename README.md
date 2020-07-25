@@ -51,7 +51,7 @@ Set environment variables in a file named `.env` at the root of the repo. Copy `
   * ✳ Find the **Signing Secret**. Set the `SLACK_CLIENT_SIGNING_SECRET` environment variable to this value.
 
 ### Local environment setup
-* Run `npm install` to download dependencies and set up TypeScript.
+* Run `npm install` to download dependencies.
 * Copy `.env.example` to a file named `.env` and make sure any required variables mentioned above are set.
 
 The main entry point is `bot.js`. Run `npm run start:dev` to start the bot in development mode with automatic reloading on code changes.
