@@ -65,7 +65,7 @@ Any file under the `features/` directory will be auto-loaded by the bot controll
 * [Botkit conversation docs](https://botkit.ai/docs/v4/conversations.html)
 * [Botkit Slack adapter](https://botkit.ai/docs/v4/platforms/slack.html)
 * [Google APIs Node.js Client](https://github.com/googleapis/google-api-nodejs-client#readme)
-* [Zoom API docs](https://marketplace.zoom.us/docs/api-reference/zoom-api) (no Node.js client library for exists for Zoom)
+* [Zoom API docs](https://marketplace.zoom.us/docs/api-reference/zoom-api) (no Node.js client library exists for Zoom)
 * Some guides to get Google Calendar set up the way we need it:
   * [How to authenticate to any Google API](https://flaviocopes.com/google-api-authentication/#service-to-service-api)
     * Follow the "Service to Service API" directions
