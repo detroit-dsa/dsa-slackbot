@@ -3,6 +3,13 @@ import * as thread from "./thread";
 
 const CREATE_CALENDAR_EVENT_DIALOG_ID = "create_event";
 
+export function attachDialog(controller) {
+  const convo = buildDialog(controller);
+  controller.addDialog(convo);
+
+  return convo;
+}
+
 export async function beginDialog(bot, userId) {
   console.log(`Starting meeting creation dialog with ${userId}`);
 
@@ -13,13 +20,6 @@ export async function beginDialog(bot, userId) {
   }
 
   await bot.beginDialog(CREATE_CALENDAR_EVENT_DIALOG_ID);
-}
-
-export function attachDialog(controller) {
-  const convo = buildDialog(controller);
-  controller.addDialog(convo);
-
-  return convo;
 }
 
 function buildDialog(controller) {

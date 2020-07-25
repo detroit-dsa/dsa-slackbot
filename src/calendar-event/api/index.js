@@ -28,14 +28,15 @@ const googleCalendarClient = new GoogleCalendarApiClient(
 );
 
 export async function createZoomMeeting(
-  convo,
+  topic,
+  description,
   startTimeISO,
   durationMinutes,
   password
 ) {
   const createZoomMeetingRequest = {
-    topic: convo.vars.title,
-    agenda: convo.vars.description,
+    topic: topic,
+    agenda: description,
     start_time: startTimeISO,
     duration: durationMinutes,
     timezone: TIME_ZONE,
@@ -54,9 +55,6 @@ export async function createZoomMeeting(
   let zoomResponse;
   try {
     zoomResponse = await zoomClient.createMeeting(createZoomMeetingRequest);
-    convo.setVar("host_url", zoomResponse.start_url);
-    convo.setVar("join_url", zoomResponse.join_url);
-    convo.setVar("password", password);
   } catch (error) {
     console.error("Failed to add to Zoom.", error);
   }
@@ -65,19 +63,16 @@ export async function createZoomMeeting(
 }
 
 export async function createGcalEvent(
-  convo,
+  title,
+  description,
+  password,
+  joinUrl,
   startTimeISO,
-  endTimeISO,
-  joinUrl
+  endTimeISO
 ) {
-  const gcalDescription = `${convo.vars.description}
-
-Join Zoom meeting: ${convo.vars.join_url}
-Password: ${convo.vars.password}`;
-
   const createGcalMeetingRequest = {
-    summary: convo.vars.title,
-    description: gcalDescription,
+    summary: title,
+    description: `${description}\n\nJoin Zoom meeting: ${joinUrl}\nPassword: ${password}`,
     start: {
       dateTime: startTimeISO,
       timeZone: TIME_ZONE,
@@ -91,12 +86,14 @@ Password: ${convo.vars.password}`;
 
   console.log("Creating GCal meeting:", createGcalMeetingRequest);
 
+  let gcalResponse;
   try {
-    const gcalResponse = await googleCalendarClient.addEvent(
+    gcalResponse = await googleCalendarClient.addEvent(
       createGcalMeetingRequest
     );
-    convo.setVar("calendar_link", gcalResponse.data.htmlLink);
   } catch (error) {
     console.error("Failed to add to Google Calendar.", error);
   }
+
+  return gcalResponse;
 }

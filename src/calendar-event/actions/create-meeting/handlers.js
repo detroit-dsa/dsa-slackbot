@@ -50,26 +50,32 @@ export async function createMeeting(convo) {
   const parsedDate = chrono.parse(convo.vars.event_time_text, new Date(), {
     forwardDate: true,
   })[0];
+  const startDate = parsedDate.start.date();
+  const endDate = parsedDate.end.date();
 
-  const startTime = parsedDate.start.date();
+  const startTimeISO = getLocalISOString(startDate);
+  const durationMinutes = Math.ceil((+endDate - +startDate) / 60000);
+  const password = generatePassword(8);
 
-  const durationMinutes = Math.ceil(
-    (+parsedDate.end.date() - +parsedDate.start.date()) / 60000
-  );
-
-  const startTimeISO = getLocalISOString(startTime);
   let zoomResponse = await api.createZoomMeeting(
-    convo,
+    convo.vars.title,
+    convo.vars.description,
     startTimeISO,
     durationMinutes,
-    generatePassword(8)
+    password
   );
+  convo.setVar("host_url", zoomResponse.start_url);
+  convo.setVar("join_url", zoomResponse.join_url);
+  convo.setVar("password", password);
 
-  const endTimeISO = getLocalISOString(parsedDate.end.date());
-  await api.createGcalEvent(
-    convo,
+  const endTimeISO = getLocalISOString(endDate);
+  const gcalResponse = await api.createGcalEvent(
+    convo.vars.title,
+    convo.vars.description,
+    password,
+    zoomResponse.join_url,
     startTimeISO,
-    endTimeISO,
-    zoomResponse.join_url
+    endTimeISO
   );
+  convo.setVar("calendar_link", gcalResponse.data.htmlLink);
 }
