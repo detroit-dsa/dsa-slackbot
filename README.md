@@ -58,7 +58,7 @@ The main entry point is `bot.js`. Run `npm run start:dev` to start the bot in de
 
 Run `npm run build` followed by `npm run start` to start in production mode.
 
-Any file under the `features/` directory will be auto-loaded by the bot controller.Refer to the Botkit docs (linked below) for more detail on how to add additional bot features.
+Any file under the `features/` directory will be auto-loaded by the bot controller. Refer to the Botkit docs (linked below) for more detail on how to add additional bot features.
 
 ### Resources
 * [Botkit docs](https://botkit.ai/docs/v4/)
