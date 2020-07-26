@@ -44,6 +44,7 @@ export async function timeInput(res, convo, bot) {
   }
 }
 
+const RRULE_WEEKDAY_CODES = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 const recurrenceOptions = ["no", "weekly", "monthly"];
 export async function recurrenceInput(res, convo, bot) {
   if (!recurrenceOptions.some((r) => res.trim() == r)) {
@@ -67,20 +68,30 @@ export async function recurrenceInput(res, convo, bot) {
         convo.setVar("recurrence_description", "Weekly, 4 times");
         break;
       }
+
       case "monthly": {
-        const gcalRecurrence = "RRULE:FREQ=MONTHLY;COUNT=3";
+        // startDate is the Nth instance of a certain weekday in its month.
+        // That's what we want to repeat on, not the actual day of the month.
+        const weekNumber = Math.ceil(startDate.getDate() / 7);
+        const repeatWeekNumber = weekNumber > 4 ? -1 : weekNumber;
+
+        const weekday = startDate.getDay();
+
+        const gcalRecurrence = `RRULE:FREQ=MONTHLY;COUNT=3;BYDAY=${RRULE_WEEKDAY_CODES[weekday]};BYSETPOS=${repeatWeekNumber}`;
         convo.setVar("gcal_recurrence", gcalRecurrence);
 
         const zoomRecurrence = {
           type: ZoomRecurrenceType.Monthly,
           end_times: 3,
-          monthly_day: startDate.getDate(),
+          monthly_week_day: weekday + 1,
+          monthly_week: repeatWeekNumber,
         };
         convo.setVar("zoom_recurrence", zoomRecurrence);
 
         convo.setVar("recurrence_description", "Monthly, 3 times");
         break;
       }
+
       default: {
         convo.setVar("gcal_recurrence", undefined);
         convo.setVar("zoom_recurrence", undefined);
