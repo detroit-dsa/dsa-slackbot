@@ -31,9 +31,7 @@ export const WEEKDAY_NAMES = [
   "Saturday",
 ];
 
-export const RRULE_WEEKDAY_CODES = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
-
-export const WEEK_NAMES = {
+export const WEEK_ORDINALS = {
   "-1": "last",
   "1": "first",
   "2": "second",

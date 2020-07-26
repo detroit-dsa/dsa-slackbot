@@ -3,11 +3,12 @@ import * as api from "../../api";
 import {
   getLocalISOString,
   generatePassword,
-  WEEK_NAMES,
+  WEEK_ORDINALS,
 } from "../../../shared/io-helper";
 import { ZoomRecurrenceType } from "../../api/zoom";
-import { RRULE_WEEKDAY_CODES, WEEKDAY_NAMES } from "../../../shared/io-helper";
+import { WEEKDAY_NAMES } from "../../../shared/io-helper";
 
+const RRULE_WEEKDAY_CODES = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 const MEETING_RECURRENCE_OPTIONS = ["no", "weekly", "monthly"];
 const WEEKLY_REPEAT_INSTANCES = 4;
 const MONTHLY_REPEAT_INSTANCES = 3;
@@ -24,13 +25,11 @@ export async function timeInput(res, convo, bot) {
 
   if (!parsedDate || parsedDate.length != 1) {
     await bot.say("Sorry, I didn't understand. Try again.");
-
     await convo.repeat();
   } else if (!parsedDate[0].end) {
     await bot.say(
       "I understood the start time, but I also need to know when the meeting should end. Please try again."
     );
-
     await convo.repeat();
   } else {
     const startDate = parsedDate[0].start.date();
@@ -85,6 +84,8 @@ export async function confirm(_answer, convo, bot) {
 }
 
 export async function createMeeting(convo) {
+  // Storing the date object in convo.vars doesn't always work for some reason,
+  // so I gave up and just decided to re-parse the string here.
   const parsedDate = chrono.parse(convo.vars.event_time_text, new Date(), {
     forwardDate: true,
   })[0];
@@ -159,7 +160,7 @@ function setRecurrenceVariablesForMonthly(convo, startDate) {
 
   convo.setVar(
     "recurrence_description",
-    `Monthly on the ${WEEK_NAMES[repeatWeekNumber]} ${WEEKDAY_NAMES[weekday]}, ${MONTHLY_REPEAT_INSTANCES} times`
+    `Monthly on the ${WEEK_ORDINALS[repeatWeekNumber]} ${WEEKDAY_NAMES[weekday]}, ${MONTHLY_REPEAT_INSTANCES} times`
   );
 }
 
