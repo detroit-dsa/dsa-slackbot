@@ -72,9 +72,3 @@ Keep this private! Use it to start the meeting and gain host privileges.
 
   convo.addAction("complete", FINISH_THREAD_ID);
 }
-
-const CANCEL_THREAD_ID = "cancel";
-export function attachCancelThread(convo) {
-  convo.addMessage("OK, never mind.", CANCEL_THREAD_ID);
-  convo.addAction("stop", CANCEL_THREAD_ID);
-}
