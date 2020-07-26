@@ -1,4 +1,4 @@
-import * as createMeeting from "../calendar-event/actions/create-meeting";
+import * as createMeeting from "./calendar-event/actions/create-meeting";
 import { CREATE_MEETING_TRIGGERS } from "./calendar-event";
 import { HELP_TRIGGERS, helpHandler } from "./help";
 

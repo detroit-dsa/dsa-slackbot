@@ -1,4 +1,4 @@
-import * as createMeeting from "../calendar-event/actions/create-meeting";
+import * as createMeeting from "./calendar-event/actions/create-meeting";
 import { helpMessages } from "./help";
 
 helpMessages.push(

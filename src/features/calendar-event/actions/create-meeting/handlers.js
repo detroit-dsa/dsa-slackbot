@@ -4,9 +4,9 @@ import {
   getLocalISOString,
   generatePassword,
   WEEK_ORDINALS,
-} from "../../../shared/io-helper";
+  WEEKDAY_NAMES,
+} from "../../../../lib/io-helper";
 import { ZoomRecurrenceType } from "../../api/zoom";
-import { WEEKDAY_NAMES } from "../../../shared/io-helper";
 
 const RRULE_WEEKDAY_CODES = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 const MEETING_RECURRENCE_OPTIONS = ["no", "weekly", "monthly"];
