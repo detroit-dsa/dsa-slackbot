@@ -29,7 +29,6 @@ function buildDialog(controller) {
   );
 
   thread.attachMainThread(convo);
-  thread.attachCancelThread(convo);
   thread.attachFinishThread(convo);
 
   return convo;

@@ -20,3 +20,21 @@ export function getLocalISOString(date) {
 
   return `${yyyy}-${MM}-${dd}T${hh}:${mm}:${ss}`;
 }
+
+export const WEEKDAY_NAMES = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+export const WEEK_ORDINALS = {
+  "-1": "last",
+  "1": "first",
+  "2": "second",
+  "3": "third",
+  "4": "fourth",
+};

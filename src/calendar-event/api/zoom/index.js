@@ -28,3 +28,4 @@ export class ZoomApiClient {
 
 export { ZoomMeetingType } from "./ZoomMeetingType";
 export { ZoomMeetingApprovalType } from "./ZoomMeetingApprovalType";
+export { ZoomRecurrenceType } from "./ZoomRecurrenceType";

@@ -32,7 +32,8 @@ export async function createZoomMeeting(
   description,
   startTimeISO,
   durationMinutes,
-  password
+  password,
+  recurrence
 ) {
   const createZoomMeetingRequest = {
     topic: topic,
@@ -40,7 +41,9 @@ export async function createZoomMeeting(
     start_time: startTimeISO,
     duration: durationMinutes,
     timezone: TIME_ZONE,
-    type: ZoomMeetingType.Scheduled,
+    type: recurrence
+      ? ZoomMeetingType.RecurringFixedTime
+      : ZoomMeetingType.Scheduled,
     password: password,
     settings: {
       approval_type: ZoomMeetingApprovalType.NoRegistrationRequired,
@@ -48,6 +51,7 @@ export async function createZoomMeeting(
       waiting_room: false,
       mute_upon_entry: true,
     },
+    recurrence: recurrence,
   };
 
   console.log("Creating Zoom meeting:", createZoomMeetingRequest);
@@ -68,7 +72,8 @@ export async function createGcalEvent(
   password,
   joinUrl,
   startTimeISO,
-  endTimeISO
+  endTimeISO,
+  recurrence
 ) {
   const createGcalMeetingRequest = {
     summary: title,
@@ -82,6 +87,7 @@ export async function createGcalEvent(
       timeZone: TIME_ZONE,
     },
     location: joinUrl,
+    recurrence: [recurrence],
   };
 
   console.log("Creating GCal meeting:", createGcalMeetingRequest);
