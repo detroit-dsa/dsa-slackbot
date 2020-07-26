@@ -1,6 +1,7 @@
 import * as chrono from "chrono-node";
 import * as api from "../../api";
 import { getLocalISOString, generatePassword } from "../../../shared/io-helper";
+import { ZoomRecurrenceType } from "../../api/zoom";
 
 export async function noop() {}
 
@@ -23,21 +24,70 @@ export async function timeInput(res, convo, bot) {
 
     await convo.repeat();
   } else {
-    const startDateAndTimeString = parsedDate[0].start
-      .date()
-      .toLocaleString([], {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+    const startDate = parsedDate[0].start.date();
+    const startDateAndTimeString = startDate.toLocaleString([], {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    convo.setVar("event_time_start_iso", startDate);
     convo.setVar("event_time_start", startDateAndTimeString);
 
-    const endTimeString = parsedDate[0].end
-      .date()
-      .toLocaleString([], { hour: "2-digit", minute: "2-digit" });
+    const endDate = parsedDate[0].end.date();
+    const endTimeString = endDate.toLocaleString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
     convo.setVar("event_time_end", endTimeString);
+  }
+}
+
+const recurrenceOptions = ["no", "weekly", "monthly"];
+export async function recurrenceInput(res, convo, bot) {
+  if (!recurrenceOptions.some((r) => res.trim() == r)) {
+    await bot.say("Sorry, I didn't understand.");
+    await convo.repeat();
+  } else {
+    const startDate = new Date(convo.vars.event_time_start_iso);
+
+    switch (res) {
+      case "weekly": {
+        const gcalRecurrence = "RRULE:FREQ=WEEKLY;COUNT=4";
+        convo.setVar("gcal_recurrence", gcalRecurrence.toString());
+
+        const zoomRecurrence = {
+          type: ZoomRecurrenceType.Weekly,
+          end_times: 4,
+          weekly_days: startDate.getDay() + 1,
+        };
+        convo.setVar("zoom_recurrence", zoomRecurrence);
+
+        convo.setVar("recurrence_description", "Weekly, 4 times");
+        break;
+      }
+      case "monthly": {
+        const gcalRecurrence = "RRULE:FREQ=MONTHLY;COUNT=3";
+        convo.setVar("gcal_recurrence", gcalRecurrence);
+
+        const zoomRecurrence = {
+          type: ZoomRecurrenceType.Monthly,
+          end_times: 3,
+          monthly_day: startDate.getDate(),
+        };
+        convo.setVar("zoom_recurrence", zoomRecurrence);
+
+        convo.setVar("recurrence_description", "Monthly, 3 times");
+        break;
+      }
+      default: {
+        convo.setVar("gcal_recurrence", undefined);
+        convo.setVar("zoom_recurrence", undefined);
+        convo.setVar("recurrence_description", "None");
+        break;
+      }
+    }
   }
 }
 
@@ -62,7 +112,8 @@ export async function createMeeting(convo) {
     convo.vars.description,
     startTimeISO,
     durationMinutes,
-    password
+    password,
+    convo.vars.zoom_recurrence
   );
   convo.setVar("host_url", zoomResponse.start_url);
   convo.setVar("join_url", zoomResponse.join_url);
@@ -75,7 +126,8 @@ export async function createMeeting(convo) {
     password,
     zoomResponse.join_url,
     startTimeISO,
-    endTimeISO
+    endTimeISO,
+    convo.vars.gcal_recurrence
   );
   convo.setVar("calendar_link", gcalResponse.data.htmlLink);
 }

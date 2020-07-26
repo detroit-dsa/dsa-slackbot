@@ -19,11 +19,18 @@ export function attachMainThread(convo) {
     { key: "event_time_text" }
   );
 
+  convo.ask(
+    "Do you want your meeting to repeat?\n\nYour options are:\n- *no*\n- *weekly* (for 1 month)\n- *monthly* (for 3 months)\n\nFor other recurrence options, talk to a Zoom admin.",
+    handlers.recurrenceInput,
+    { key: "recurrence_text" }
+  );
+
   convo.say("OK, here's the meeting I'll make.");
 
   convo.say(`*Title:* {{vars.title}}
 *Time:* {{vars.event_time_start}} - {{vars.event_time_end}}
-*Description:* {{vars.description}}`);
+*Description:* {{vars.description}}
+*Recurrence:* {{vars.recurrence_description}}`);
 
   convo.ask(
     "Look good?",
