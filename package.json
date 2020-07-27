@@ -2,6 +2,10 @@
   "name": "dsa-slackbot",
   "version": "1.0.0",
   "main": "src/bot.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/detroit-dsa/dsa-slackbot"
+  },
   "scripts": {
     "build": "babel src --out-dir dist",
     "start:dev": "nodemon --exec babel-node src/bot.js",

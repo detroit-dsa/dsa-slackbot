@@ -1,7 +1,5 @@
-// dotenv must be loaded before controller, so this part is tricky with ES6 imports.
-// Just use plain old require() instead.
-require("dotenv").config();
-const controller = require("./bot-controller").controller;
+import "dotenv/config";
+import { controller } from "./bot-controller";
 
 controller.ready(() => {
   controller.loadModules(__dirname + "/features");
