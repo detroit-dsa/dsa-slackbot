@@ -53,13 +53,15 @@ export async function timeInput(res, convo, bot) {
 }
 
 export async function recurrenceInput(res, convo, bot) {
-  if (!MEETING_RECURRENCE_OPTIONS.some((r) => res.trim() == r)) {
+  const response = res.trim();
+
+  if (!MEETING_RECURRENCE_OPTIONS.some((option) => response == option)) {
     await bot.say("Sorry, I didn't understand.");
     await convo.repeat();
   } else {
     const startDate = new Date(convo.vars.event_time_start_iso);
 
-    switch (res) {
+    switch (response) {
       case "weekly": {
         setRecurrenceVariablesForWeekly(convo, startDate);
         break;
