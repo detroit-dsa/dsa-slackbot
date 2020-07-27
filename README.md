@@ -25,8 +25,8 @@ Set environment variables in a file named `.env` at the root of the repo. Copy `
   * Click **Create credentials > Service account**
     * Specify service account details.
     * Continue past the "Grant this service account access to project" and "Grant users access to this service account" pages without making any changes.
-  * After the account is created, click on it under the **Service Accounts** header.
-    * Find the **Keys** section. Add a key and choose **JSON**.
+* After the account is created, click on it under the **Service Accounts** header.
+  * Find the **Keys** section. Add a key and choose **JSON**.
 * ✳ Find the `"client_email"` value in the `.json` file you downloaded. Set the `GOOGLE_SERVICE_ACCOUNT_CLIENT_EMAIL` environment variable to this value.
 * ✳ Find the `"private_key"` value in the `.json` file you downloaded. Set the `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` environment variable to this value.
 
