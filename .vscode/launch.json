@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\src\\bot.js",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["babel-node", "--nolazy"],
+      "env": { "BABEL_ENV": "development" }
+    }
+  ]
+}

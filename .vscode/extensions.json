@@ -3,6 +3,7 @@
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
     "mgmcdermott.vscode-language-babel",
-    "EditorConfig.EditorConfig"
+    "EditorConfig.EditorConfig",
+    "philnash.ngrok-for-vscode"
   ]
 }

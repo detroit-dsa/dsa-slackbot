@@ -1,7 +1,7 @@
 {
   "name": "dsa-slackbot",
   "version": "1.0.0",
-  "main": "bot.js",
+  "main": "src/bot.js",
   "scripts": {
     "build": "babel src --out-dir dist",
     "start:dev": "nodemon --exec babel-node src/bot.js",
