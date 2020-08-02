@@ -9,7 +9,7 @@ import {
 import { ZoomRecurrenceType } from "../../api/zoom";
 
 const RRULE_WEEKDAY_CODES = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
-const MEETING_RECURRENCE_OPTIONS = ["no", "weekly", "monthly"];
+const MEETING_RECURRENCE_OPTIONS = ["NO", "WEEKLY", "MONTHLY"];
 const WEEKLY_REPEAT_INSTANCES = 4;
 const MONTHLY_REPEAT_INSTANCES = 3;
 
@@ -53,21 +53,21 @@ export async function timeInput(res, convo, bot) {
 }
 
 export async function recurrenceInput(res, convo, bot) {
-  const response = res.trim();
+  const response = res.trim().toUpperCase();
 
-  if (!MEETING_RECURRENCE_OPTIONS.some((option) => response == option)) {
+  if (!MEETING_RECURRENCE_OPTIONS.some((option) => response === option)) {
     await bot.say("Sorry, I didn't understand.");
     await convo.repeat();
   } else {
     const startDate = new Date(convo.vars.event_time_start_iso);
 
     switch (response) {
-      case "weekly": {
+      case "WEEKLY": {
         setRecurrenceVariablesForWeekly(convo, startDate);
         break;
       }
 
-      case "monthly": {
+      case "MONTHLY": {
         setRecurrenceVariablesForMonthly(convo, startDate);
         break;
       }
