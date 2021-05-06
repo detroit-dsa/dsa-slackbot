@@ -16,7 +16,7 @@
     "@babel/runtime": "^7.10.5",
     "axios": "^0.19.2",
     "botkit": "^4.9.0",
-    "chrono-node": "^2.1.4",
+    "chrono-node": "^2.2.4",
     "dotenv": "^8.2.0",
     "googleapis": "^55.0.0",
     "he": "^1.2.0"
